@@ -1,0 +1,30 @@
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["Argento.ReportingService/Argento.ReportingService.csproj", "Argento.ReportingService/"]
+COPY ["NuGet.Config", "."]
+COPY ["Argento.ReportingService.BL/Argento.ReportingService.BL.csproj", "Argento.ReportingService.BL/"]
+COPY ["Argento.ReportingService.DL/Argento.ReportingService.DL.csproj", "Argento.ReportingService.DL/"]
+COPY ["Argento.ReportingService.Repository/Argento.ReportingService.Repository.csproj", "Argento.ReportingService.Repository/"]
+COPY ["Argento.ReportingService.Utility/Argento.ReportingService.Utility.csproj", "Argento.ReportingService.Utility/"]
+COPY ["Argento.ReportingService.Repository.ReportingServiceDB/Argento.ReportingService.Repository.ReportingServiceDB.csproj", "Argento.ReportingService.Repository.ReportingServiceDB/"]
+RUN dotnet restore "Argento.ReportingService/Argento.ReportingService.csproj"
+COPY . .
+WORKDIR /src/Argento.ReportingService
+RUN dotnet build Argento.ReportingService.csproj -c Release -o /app
+
+FROM build AS publish
+RUN dotnet publish Argento.ReportingService.csproj -c Release -o /app
+
+FROM base AS final
+WORKDIR /app
+
+ENV http_proxy http://proxy-svc.default:3128
+ENV https_proxy http://proxy-svc.default:3128
+ENV no_proxy=.dev
+
+COPY --from=publish /app .
+ENTRYPOINT ["dotnet", "Argento.ReportingService.dll"]

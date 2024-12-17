@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2026
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Argento.ReportingService", "Argento.ReportingService\Argento.ReportingService.csproj", "{0D398FE8-B6F2-4E83-91BB-0615CCB59D14}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Argento.ReportingService.BL", "Argento.ReportingService.BL\Argento.ReportingService.BL.csproj", "{DE1DFBB3-27E1-4148-8085-B0B958AEC4B1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Argento.ReportingService.DL", "Argento.ReportingService.DL\Argento.ReportingService.DL.csproj", "{EC3215AC-3F9B-4611-949B-B51AA67BB127}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Argento.ReportingService.Repository", "Argento.ReportingService.Repository\Argento.ReportingService.Repository.csproj", "{F8980C77-96DB-4F76-B207-0CA5588193BC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Argento.ReportingService.Repository.ReportingServiceDB", "Argento.ReportingService.Repository.ReportingServiceDB\Argento.ReportingService.Repository.ReportingServiceDB.csproj", "{C3F0A283-804E-4CA4-A16D-CDC2BB22DB89}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Argento.ReportingService.Utility", "Argento.ReportingService.Utility\Argento.ReportingService.Utility.csproj", "{D1BE66C3-1102-46C5-A78F-53B762C9304B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0D398FE8-B6F2-4E83-91BB-0615CCB59D14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D398FE8-B6F2-4E83-91BB-0615CCB59D14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D398FE8-B6F2-4E83-91BB-0615CCB59D14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D398FE8-B6F2-4E83-91BB-0615CCB59D14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE1DFBB3-27E1-4148-8085-B0B958AEC4B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE1DFBB3-27E1-4148-8085-B0B958AEC4B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE1DFBB3-27E1-4148-8085-B0B958AEC4B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE1DFBB3-27E1-4148-8085-B0B958AEC4B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC3215AC-3F9B-4611-949B-B51AA67BB127}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC3215AC-3F9B-4611-949B-B51AA67BB127}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC3215AC-3F9B-4611-949B-B51AA67BB127}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC3215AC-3F9B-4611-949B-B51AA67BB127}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8980C77-96DB-4F76-B207-0CA5588193BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8980C77-96DB-4F76-B207-0CA5588193BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8980C77-96DB-4F76-B207-0CA5588193BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8980C77-96DB-4F76-B207-0CA5588193BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3F0A283-804E-4CA4-A16D-CDC2BB22DB89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3F0A283-804E-4CA4-A16D-CDC2BB22DB89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3F0A283-804E-4CA4-A16D-CDC2BB22DB89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3F0A283-804E-4CA4-A16D-CDC2BB22DB89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1BE66C3-1102-46C5-A78F-53B762C9304B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1BE66C3-1102-46C5-A78F-53B762C9304B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1BE66C3-1102-46C5-A78F-53B762C9304B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1BE66C3-1102-46C5-A78F-53B762C9304B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5B2034BD-A59A-471E-A3D2-B367A6078FA6}
+	EndGlobalSection
+EndGlobal

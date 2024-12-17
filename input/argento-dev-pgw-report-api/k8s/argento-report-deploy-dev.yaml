@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: report
+  namespace: ${NAMESPACE_K8S}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: report
+  template:
+    metadata:
+      labels:
+        component: report
+    spec:
+      containers:
+        - name: report
+          image: harbor.argentotech.co/api/${IMG_NAME}:${APP_VERSION}
+          imagePullPolicy: Always
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+            - name: IdentityUrl
+              valueFrom:
+                configMapKeyRef:
+                  name: internalurls
+                  key: identity
+          # ports:
+          # - containerPort: 80
+          #   name: argento-report-p
+          volumeMounts:
+#          - name: argento-report-v
+#            mountPath: /app/appsettings.json
+#            subPath: appsettings.json
+          - name: tz-config
+            mountPath: /etc/localtime
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1000Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+      volumes:
+#      - name: argento-report-v
+#        configMap:
+#          name: argento-report-config
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Bangkok
+          type:
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: report-svc
+  namespace: ${NAMESPACE_K8S}
+spec:
+  type: NodePort
+  selector:
+    component: report
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30144
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: report-ing
+  namespace: ${NAMESPACE_K8S}
+  annotations:
+    #nginx.ingress.kubernetes.io/rewrite-target: /$2
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/limit-rate: "3145728" # 3 MB in bytes
+    nginx.ingress.kubernetes.io/limit-rate-after: "5242880" # 5 MB in bytes
+    # nginx.ingress.kubernetes.io/keep-alive: "64"  # number of idle keep-alive connections
+    # nginx.ingress.kubernetes.io/keep-alive-timeout: "10m"  # time the server waits before closing the connection
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600" # time to read the first byte from the upstream
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600" # time for the client to send a request to the server
+spec:
+  rules:
+  - host: "report-dev.argentotech.co"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: report-svc
+            port:
+              number: 80
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reporting-daily-cronjob
+  namespace: ${NAMESPACE_K8S}
+spec:
+  schedule: "30 8 * * 1-5"  # Every day at 8.30AM from Monday through Friday
+  concurrencyPolicy: Replace # Replace existing job if it's still running
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: curl-container
+            image: curlimages/curl:latest
+            command:
+            - /bin/sh
+            - -c
+            - >
+              curl -X GET 
+              'http://report-svc.dev/api/v1/transaction/auto-sending-transaction-report/accounting?StartDate=&EndDate='
+              -H 'accept: */*'
+          restartPolicy: OnFailure

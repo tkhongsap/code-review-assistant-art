@@ -1,0 +1,186 @@
+def getDEPLOYMENT_FILE (String branchname) {
+  if (branchname == 'qa') {
+    return 'k8s/argento-report-deploy-qa.yaml'
+  }
+  if (branchname == 'sandbox') {
+    return 'k8s/argento-report-deploy-sandbox.yaml'
+  }
+  if (branchname == 'tags') {
+    return 'k8s/argento-report-deploy-prod.yaml'
+  }
+  
+  return 'k8s/argento-report-deploy-dev.yaml'
+}
+
+def getNamespaceK8s (String branchname) {
+	if (branchname == 'qa') {
+		return 'qa';
+	}
+	if (branchname == 'sandbox') {
+		return 'sandbox';
+	}
+  if (branchname == 'tags') {
+		return 'prod';
+	}
+
+	return 'dev'
+}
+
+def getAPI_HOSTNAME (String branchname) {
+  if (branchname == 'qa') {
+    return 'report-qa.argentotech.co'
+  }
+  if (branchname == 'sandbox') {
+    return 'report-sandbox.argentotech.co'
+  }
+  if (branchname == 'tags') {
+    return 'report-prod-directbiller.argentotech.co'
+  }
+  
+  return 'report-dev.argentotech.co'
+}
+
+def getImageName (String branchname) {
+  if (branchname == 'qa') {
+    return 'report-qa'
+  }
+  if (branchname == 'sandbox') {
+    return 'report-sandbox'
+  }
+  if (branchname == 'tags') {
+    return 'report-prod'
+  }
+  
+  return 'report-dev'
+}
+
+def getIPEnv (String branchname) {
+  if (branchname == 'qa') {
+    return '43.255.106.113'
+  }
+  if (branchname == 'sandbox') {
+    return '43.225.140.20'
+  }
+  if (branchname == 'tags') {
+    return '43.225.140.21'
+  }
+  
+  return '43.255.106.113'
+}
+
+def COLOR_MAP = [
+    'SUCCESS': 'good', 
+    'FAILURE': 'danger',
+    'UNSTABLE': 'warning',
+]
+
+def COLOR_MAP_MSTEAM = [
+    'SUCCESS': '#47d147', 
+    'FAILURE': '#ff0000',
+    'UNSTABLE': '#ffff00',
+]
+
+pipeline {
+  agent { label 'slave-1' }
+  environment {
+    BRANCH_NAME = "${GIT_BRANCH.split("/")[1]}"
+    IMG_NAME = getImageName(env.BRANCH_NAME)
+	DEPLOYMENT_FILE = getDEPLOYMENT_FILE(env.BRANCH_NAME)
+    DOCKERFILE_PATH = 'Argento.ReportingService'
+    API_HOSTNAME = getAPI_HOSTNAME(env.BRANCH_NAME)
+    NAMESPACE_K8S = getNamespaceK8s(env.BRANCH_NAME)
+	IP_ENV = getIPEnv(env.BRANCH_NAME)
+  }
+    
+  stages {
+    stage('Checkout') {
+      when { expression { env.BRANCH_NAME != 'tags' } }
+      steps {
+          script {
+              env.GIT_COMMIT_MSG = sh (script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
+              env.GIT_AUTHOR_ID = sh (script: 'git show -s --pretty=%an', returnStdout: true).trim()
+          }
+      }
+    }
+
+    // stage('Build & Push') {
+    //   steps {
+    //     script {
+    //       if (env.BRANCH_NAME == 'tags') {
+    //         env.APP_VERSION = "${GIT_BRANCH.split("/")[2]}"
+    //       } else {
+    //         env.APP_VERSION = "v0.0.${BUILD_NUMBER}"
+    //       }
+		  
+    //       sh("""
+    //         echo =================Build and Push Docker Image==========================
+    //         pwd
+    //         sed -i 's/"Version": "0"/"Version": "${APP_VERSION}"/' ${DOCKERFILE_PATH}/appsettings.json
+
+    //         docker build -f ${DOCKERFILE_PATH}/Dockerfile.${NAMESPACE_K8S} -t ${IMG_NAME}:${APP_VERSION} .
+    //         docker tag ${IMG_NAME}:${APP_VERSION} harbor.argentotech.co/api/${IMG_NAME}:${APP_VERSION}
+    //         docker push harbor.argentotech.co/api/${IMG_NAME}:${APP_VERSION}
+    //       """) 
+    //     }   
+    //   }
+    // }
+
+    stage('Deploy') {
+		  steps{
+			  script{
+          if (env.BRANCH_NAME == 'tags') {
+            env.APP_VERSION = "${GIT_BRANCH.split("/")[2]}"
+          } else {
+            env.APP_VERSION = "v0.0.${BUILD_NUMBER}"
+          }
+          
+          withKubeConfig(credentialsId: "argento-${NAMESPACE_K8S}-cluster") {
+            sh("""
+                echo =================Deploy To Kubernetes==========================
+                cat ${DEPLOYMENT_FILE} | envsubst | kubectl apply -n ${NAMESPACE_K8S} -f -
+                echo "Deploy Version:${APP_VERSION}"
+            """)
+          }
+			  }
+		  }
+	  }
+	
+	  stage('Check Version') {
+      steps {
+	      script {
+          sleep 20
+		      def response = sh(script: 'curl -k -H "Host: $API_HOSTNAME" https://${IP_ENV}/version', returnStdout: true)
+		
+		      echo "APP_VERSION: ${APP_VERSION} response: ${response}"
+		      if (APP_VERSION != response) {
+			      throw new Exception('error');
+		      }
+		  
+		      echo 'SUCCESS'
+		    }
+	    }
+    }
+  } // stages
+
+  post {
+    always {
+      withCredentials([string(credentialsId: 'PGW_NOTIFICATION_MSTEAM', variable: 'PGW_NOTIFICATION_MSTEAM')]) {
+        office365ConnectorSend (
+            webhookUrl: "${PGW_NOTIFICATION_MSTEAM}",
+            color: COLOR_MAP_MSTEAM[currentBuild.currentResult],
+            message: """**[${currentBuild.currentResult}]** Job: ${env.JOB_NAME}<br> 
+                        By: ${env.GIT_AUTHOR_ID}<br>
+                        Message: ${env.GIT_COMMIT_MSG}<br>
+                        ---<br>
+                        Env: ${BRANCH_NAME}, build#${env.BUILD_NUMBER}<br>
+                        Branch: ${env.GIT_BRANCH}<br>
+                        Duration: ${currentBuild.durationString}<br>
+                        ---<br>
+                        More info: ${JOB_URL}"""
+        )
+      }
+
+      cleanWs()          
+    }
+  } // post
+} // pipeline

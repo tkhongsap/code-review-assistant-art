@@ -1,0 +1,65 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <Version>1.0.0</Version>
+    <Description>
+</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="logs\**" />
+    <Content Remove="logs\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <None Remove="logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Dockerfile" />
+    <None Remove="Dockerfile.original" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+    <!--<FrameworkReference Include="Microsoft.AspNetCore.App" />-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Arcadia.CrudController.AspNetCore" Version="1.7.3" />
+    <PackageReference Include="Arcadia.Extensions.DependencyInjection" Version="1.0.6" />
+    <PackageReference Include="Arcadia.Security.Signature" Version="1.3.1" />
+    <PackageReference Include="Arcadia.Security.Signature.AspNetCore" Version="1.4.1" />
+    <PackageReference Include="AutoMapper" Version="11.0.1" />
+    <PackageReference Include="Confluent.Kafka" Version="1.9.2" />
+    <PackageReference Include="EPPlus" Version="7.3.0" />
+    <PackageReference Include="JWT" Version="7.2.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NLog.Extensions.Logging" Version="1.6.4" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.3" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Argento.ReportingService.BL\Argento.ReportingService.BL.csproj" />
+    <ProjectReference Include="..\Argento.ReportingService.DL\Argento.ReportingService.DL.csproj" />
+    <ProjectReference Include="..\Argento.ReportingService.Repository.ReportingServiceDB\Argento.ReportingService.Repository.ReportingServiceDB.csproj" />
+    <ProjectReference Include="..\Argento.ReportingService.Repository\Argento.ReportingService.Repository.csproj" />
+    <ProjectReference Include="..\Argento.ReportingService.Utility\Argento.ReportingService.Utility.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>
